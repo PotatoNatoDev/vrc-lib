@@ -1,5 +1,5 @@
 # vrc-lib
-A simple template/library for VRC robots.
+A simple template/library for VRC robots using PROS 4.
 
 ## Features
 - insert here

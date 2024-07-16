@@ -1,10 +1,6 @@
 #pragma once
 
-#include "pros/motors.hpp"
-#include "pros/motor_group.hpp"
-#include "pros/misc.hpp"
-#include "pros/imu.hpp"
-#include "pros/adi.hpp"
+#include "main.h"
 
 inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 

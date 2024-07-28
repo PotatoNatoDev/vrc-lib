@@ -2,21 +2,23 @@
 
 #include "main.h"
 
+// taken from https://orange-depot.github.io/posts/Basic-PID/
+
 class PID {
     public:
-    // constructor
-    PID(float kP, float kI, float kD):
+    // PID constructor
+    PID(double kP, double kI, double kD):
         kP(kP),
         kI(kI),
         kD(kD) {}
 
     // update pid loop
-    float update(const float error) {
+    double update(const double error) {
         // integral
         integral += error;
 
         // derivative
-        const float derivative = error - prevError;
+        const double derivative = error - prevError;
         prevError = error;
 
         // calculate output
@@ -29,10 +31,9 @@ class PID {
     }
 
     protected:
-    float kP;
-    float kI;
-    float kD;
-    float integral = 0;
-    float prevError = 0;
-
+    double kP;
+    double kI;
+    double kD;
+    double integral = 0;
+    double prevError = 0;
 };

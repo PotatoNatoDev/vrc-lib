@@ -1,6 +1,7 @@
 #include "main.h"
 #include "globals.hpp"
 #include "lib/opcontrol.hpp"
+#include "lib/autoncontrol.hpp"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -70,6 +71,6 @@ void opcontrol() {
     while(true) {
         // run opcontrol loop code
         opcontrol_loop();
-        pros::delay(10);
+        pros::delay(20);
     }
 }

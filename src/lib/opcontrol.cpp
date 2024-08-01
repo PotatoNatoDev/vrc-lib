@@ -8,7 +8,7 @@ void opcontrol_init() {
 
 }
 
-// normal drivetrain control
+// normal arcade drivetrain control
 void arcade_drive_regular() {
     // get controller joysticks
     int yAxis = master.get_analog(ANALOG_LEFT_Y);
@@ -19,11 +19,10 @@ void arcade_drive_regular() {
     rmotors.move(yAxis - xAxis);
 }
 
-
-
 PID drivetrainPID(1,1,1);
 bool drivingStraight = false;
-// drivetrain control with pid to make it drive straight
+double drivetrainForwardDirection;
+// arcade drivetrain control with pid to make it drive straight
 void arcade_drive_pid() {
     int yAxis = master.get_analog(ANALOG_LEFT_Y);
     int xAxis = master.get_analog(ANALOG_RIGHT_X);
@@ -33,9 +32,20 @@ void arcade_drive_pid() {
         // move drivetrain normally
         lmotors.move(yAxis + xAxis);
         rmotors.move(yAxis - xAxis);
+        drivingStraight = false;
     } else {
-        // there is no movement on the xAxis, drive forward/backward with PID to correct for slight turning
+        // if we were previously turning
+        if(drivingStraight == false) {
+            // set the new direction we're facing as the forward direction.
+            drivetrainForwardDirection = inertial.get_heading();
+            drivetrainPID.reset();
+            drivingStraight = true;
+        }
 
+        double error = drivetrainForwardDirection - inertial.get_heading();
+        double turnCorrection = drivetrainPID.update(error);
+        lmotors.move(yAxis + turnCorrection);
+        rmotors.move(yAxis - turnCorrection);
     }
 }
 

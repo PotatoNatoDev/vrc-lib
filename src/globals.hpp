@@ -1,6 +1,11 @@
 #pragma once
 
 #include "main.h"
+#include <math.h>
+
+// wheel circumference
+const double wheelCircumference = 2.75 * M_PI;
+const double drivetrainRatio = 48.0/60.0; // 48:60 -> 48/60 = 0.8
 
 inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 

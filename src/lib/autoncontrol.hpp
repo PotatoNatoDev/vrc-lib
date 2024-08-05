@@ -2,5 +2,5 @@
 
 void move(double leftPower, double rightPower);
 void move_steering(double forwardSpeed, double turnSpeed);
-void turn(double targetHeading, double safeZone = 1, float safeTime = 1000, float timeOut = 999999);
-void go_straight(float distance, int power, int momentum = 127, int minPower = 30, int decelZone = 1, float decelRate = 0.8, float timeOut = 999999);
+void turn(double targetHeading, int forceDirection = 0, double safeZone = 1, float safeTime = 80, float timeOut = 999999);
+void go_straight(double distance, int power, int momentum = 0, int minPower = 30, int decelZone = 540, double decelRate = 0.1, float timeOut = 999999);

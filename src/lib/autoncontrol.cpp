@@ -3,7 +3,7 @@
 #include "main.h"
 #include "pid.hpp"
 #include "custom_math.hpp"
-#include <vector>
+#include "pros/rtos.h"
 
 /* Moves both drivetrain sides with one function
    - int leftPower: the power provided to the left drivetrain motors
@@ -20,50 +20,28 @@ void move_steering(double forwardSpeed, double turnSpeed) {
     move(forwardSpeed + turnSpeed, forwardSpeed - turnSpeed);
 }
 
-
 // finds the average encoder value between all the drivetrain motors
 double avg_encoder() {
-    // create a vector with all of the drivetrain encoders in it.
-    std::vector<double> positions = lmotors.get_position_all();
-    std::vector<double> rpositions = rmotors.get_position_all();
-    positions.insert(positions.end(), rpositions.begin(), rpositions.end());
-
-    // add all of the encoder values together
     double total;
-    for(int i = 0; i < positions.size(); i++) total += positions[i];
-
-    // get the average by dividing the total by the total number of drivetrain motors
-    return total / (double)positions.size();
+    int numLMotors = lmotors.get_position_all().size();
+    int numRMotors = rmotors.get_position_all().size();
+    for(int i = 0; i < numLMotors; i++) {
+        total += lmotors.get_position(i);
+    }
+    for(int i = 0; i < numRMotors; i++) {
+        total += rmotors.get_position(i);
+    }
+    return total / (numLMotors + numRMotors);
 }
 
-PID goStraightPID(1,1,1); //NOTE TO SELF: we might be able to reuse turn PID
-/*  Move the robot forward in a straight line. Uses motion profiling for forward momentum,
-    and uses a PID controller to ensure it goes straight.
-    - `float distance`:    The distance that the robot moves in inches.
-    - `int power`:         The maximum power that the robot moves at. this power
-    is maintained while the robot is cruising, and decreases when the robot
-    decelerates.
-    - `int minPower`:      The minimum power that the robot will decelerate to.
-    - `int decelZone`:     The zone in which the robot starts decelerating.
-    - `float decelRate`:   The rate at which the robot decelerates. */
-void go_straight(float distance, int power, int momentum, int minPower, int decelZone, float decelRate, float timeOut) {
-    lmotors.tare_position();
-    rmotors.tare_position();
-
-    double initialRotation = inertial.get_heading();
-
-    
-}
-
-
-PID turnPID(1,1,1); // tune these values for turning
+PID turnPID(7,0,20); // tune these values for turning
 /* Turns the robot to a certain heading relative to the field (field oriented).
     - `double targetHeading`: the direction you want the robot to face
+    - `int forceDirection`: force the robot to turn a certain direction (left = -1, right = 1)
     - `double safeZone`: how far the robot can face from the target heading
     - `float safeTime`: How long the robot has to be in the safezone before it can move on
-    - `float timeOut`: the maximum amount of time the robot should take the turn before we should just move on*/
-void turn(double targetHeading, double safeZone, float safeTime, float timeOut) {
-    
+    - `float timeOut`: the maximum amount of time the robot will attempt to turn before moving on*/
+void turn(double targetHeading, int forceDirection, double safeZone, float safeTime, float timeOut) {
     // note you might have to change inertial.get_heading() to rotationToHeading(get_rotation()) depending on how you oriented the imu
     double error = closestAngle(targetHeading, inertial.get_heading());
     
@@ -72,25 +50,80 @@ void turn(double targetHeading, double safeZone, float safeTime, float timeOut) 
 
     turnPID.reset(); // reset the PID
 
-    // loops while we haven't been in the safezone long enough & we haven't timed out for taking too long
+    bool ignoreForceTurn = false;
+    // loops while we haven't been in the safezone long enough & we haven't timed out
     while(pros::c::millis() < safeTimer && pros::c::millis() < exitTime) {
         // find the error between our current heading and the target heading
         error = closestAngle(targetHeading, inertial.get_heading());
-        
-        // update PID and turn
-        move_steering(0, turnPID.update(error));
+
+        if(ignoreForceTurn == false) {
+            if(forceDirection > 0 && error < 0) error += 360; // force a right turn if specified
+            else if(forceDirection < 0 && error > 0) error -= 360; // force a left turn if specified
+        }
+
+        master.print(0,0,"error: %f", error);
+
+        move_steering(0, turnPID.update(error)); // update PID and turn
 
         // if we aren't in the safezone yet, increase the timer
         // this means if we are in the safezone, the timer won't increase.
         // if it doesn't increase long enough, pros::c::millis() will be more than the safeTimer.
         // this will break the while loop
-
-        if(fabs(inertial.get_heading() - targetHeading) > safeZone) {
-            safeTimer = pros::c::millis() + safeTime;
-        }
+        if(fabs(error) > safeZone) safeTimer = pros::c::millis() + safeTime;
+        else ignoreForceTurn = true; // to prevent overshooting when forcing a direction
+        pros::delay(20);
     }
     // stop motors
     move(0,0);
     turnPID.reset(); // reset PID (again to be safe)
     pros::delay(100); // delay so any movement from the motors settle before moving on.
+}
+
+PID goStraightPID(2,0,0); //NOTE TO SELF: we might be able to reuse turn PID
+/*  Move the robot forward in a straight line. Uses motion profiling for forward momentum,
+    and uses a PID controller to ensure it goes straight.
+    - `double distance`:    The distance that the robot moves in inches.
+    - `int power`:         The maximum power that the robot moves at. this power
+    is maintained while the robot is cruising, and decreases when the robot
+    decelerates.
+    - `int minPower`:      The minimum power that the robot will decelerate to.
+    - `int decelZone`:     The zone in which the robot starts decelerating.
+    - `double decelRate`:   The rate at which the robot decelerates. 
+    - `float timeOut`: the maximum amount of time the robot will attempt to move before moving on*/
+void go_straight(double distance, int power, int momentum, int minPower, int decelZone, double decelRate, float timeOut) {
+    lmotors.tare_position_all();
+    rmotors.tare_position_all();
+
+    double initialHeading = inertial.get_heading();
+    
+    double distanceDegrees = distance; // NOTE TO SELF: MAKE IT CONVERT FROM INCHES TO DEGREES
+    double decelDegrees = decelZone; // NOTE TO SELF: MAKE IT CONVERT FROM INCHES TO DEGREES
+
+    float exitTime = pros::c::millis() + timeOut; // this variable holds the time we exit if we take too long
+    
+    double currentPower = power * 10;
+    
+    while(abs(avg_encoder()) < distanceDegrees - momentum && pros::c::millis() < exitTime) {
+        double remainingDistance = distanceDegrees - abs(avg_encoder());
+
+        if(remainingDistance < decelDegrees) {
+            currentPower = currentPower * (1 - decelRate);
+            currentPower = fabs(currentPower) > minPower ? currentPower : minPower;
+        } else {
+            currentPower = currentPower * 1.2;
+            if (fabs(currentPower) > power) currentPower = power;
+        }
+
+        double error = closestAngle(initialHeading, inertial.get_heading());
+        master.print(0,0, "drive error: %f", error);
+
+        move_steering(currentPower, goStraightPID.update(error));
+        pros::delay(20);
+    }
+
+    double remainingDistance = distanceDegrees - abs(avg_encoder());
+    master.print(0,0, "final position: %f", remainingDistance);
+    
+    move(0,0);
+    pros::delay(100);
 }

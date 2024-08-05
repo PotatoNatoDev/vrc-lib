@@ -10,7 +10,8 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	
+	lmotors.tare_position_all();
+    rmotors.tare_position_all();
 }
 
 /**
@@ -49,7 +50,10 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-    
+    go_straight(360*10, 100);
+    turn(180);
+    go_straight(360*10, 100);
+    turn(0);
 }
 
 /**

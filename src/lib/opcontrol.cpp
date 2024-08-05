@@ -1,7 +1,9 @@
 #include "opcontrol.hpp"
 #include "../globals.hpp"
 #include "pid.hpp"
+#include "custom_math.hpp"
 #include "main.h"
+
 
 // code to initalization opcontrol properly
 void opcontrol_init() {
@@ -19,7 +21,7 @@ void arcade_drive_regular() {
     rmotors.move(yAxis - xAxis);
 }
 
-PID drivetrainPID(1,1,1);
+PID drivetrainPID(2,0,0);
 bool drivingStraight = false;
 double drivetrainForwardDirection;
 // arcade drivetrain control with pid to make it drive straight
@@ -42,7 +44,7 @@ void arcade_drive_pid() {
             drivingStraight = true;
         }
 
-        double error = drivetrainForwardDirection - inertial.get_heading();
+        double error = closestAngle(drivetrainForwardDirection, inertial.get_heading());
         double turnCorrection = drivetrainPID.update(error);
         lmotors.move(yAxis + turnCorrection);
         rmotors.move(yAxis - turnCorrection);
@@ -55,4 +57,5 @@ void opcontrol_loop() {
     // driving controls
     arcade_drive_regular();
     //arcade_drive_pid();
+    pros::delay(20);
 }

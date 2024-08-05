@@ -51,9 +51,7 @@ void competition_initialize() {
  */
 void autonomous() {
     go_straight(360*10, 100);
-    turn(180);
-    go_straight(360*10, 100);
-    turn(0);
+    go_straight(360*10, -100);
 }
 
 /**
@@ -75,6 +73,5 @@ void opcontrol() {
     while(true) {
         // run opcontrol loop code
         opcontrol_loop();
-        pros::delay(20);
     }
 }

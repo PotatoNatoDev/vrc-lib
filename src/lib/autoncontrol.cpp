@@ -108,7 +108,7 @@ void go_straight(double distance, int power, int momentum, int minPower, int dec
 
         if(remainingDistance < decelDegrees) {
             currentPower = currentPower * (1 - decelRate);
-            currentPower = fabs(currentPower) > minPower ? currentPower : minPower;
+            currentPower = fabs(currentPower) > minPower ? currentPower : minPower * sgn(power);
         } else {
             currentPower = currentPower * 1.2;
             if (fabs(currentPower) > power) currentPower = power;

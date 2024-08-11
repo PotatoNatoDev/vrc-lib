@@ -79,7 +79,7 @@ void turn(double targetHeading, int forceDirection, double safeZone, float safeT
     pros::delay(100); // delay so any movement from the motors settle before moving on.
 }
 
-PID goStraightPID(2,0,0); //NOTE TO SELF: we might be able to reuse turn PID
+PID goStraightPID(2,0,0); //tune this for going straight
 /*  Move the robot forward in a straight line. Uses motion profiling for forward momentum,
     and uses a PID controller to ensure it goes straight.
     - `double distance`:    The distance that the robot moves in inches.

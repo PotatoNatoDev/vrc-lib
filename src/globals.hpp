@@ -5,7 +5,7 @@
 
 // wheel circumference
 const double wheelCircumference = 2.75 * M_PI;
-const double drivetrainRatio = 60.0/48.0; // 60:48 -> 60/48 = 1.25
+const double drivetrainRatio = 60.0/48.0; // driven gear:driving gear
 
 inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 

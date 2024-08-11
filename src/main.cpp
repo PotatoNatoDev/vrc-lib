@@ -50,8 +50,8 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-    go_straight(360*10, 100);
-    go_straight(360*10, -100);
+    go_straight(40, 80);
+    go_straight(40, 80);
 }
 
 /**

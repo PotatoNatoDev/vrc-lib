@@ -96,8 +96,13 @@ void go_straight(double distance, int power, int momentum, int minPower, int dec
 
     double initialHeading = inertial.get_heading();
     
-    double distanceDegrees = distance; // NOTE TO SELF: MAKE IT CONVERT FROM INCHES TO DEGREES
-    double decelDegrees = decelZone; // NOTE TO SELF: MAKE IT CONVERT FROM INCHES TO DEGREES
+    //double distanceDegrees = distance;
+    //double decelDegrees = decelZone;
+
+    // For some reason you might need to multiply these by 2.67 for it to work.
+    // No clue why since in theory it should work without multiplying it by 2.67.
+    double distanceDegrees = (distance/wheelCircumference) * 360 * drivetrainRatio * 2.67;
+    double decelDegrees = (decelZone/wheelCircumference) * 360 * drivetrainRatio * 2.67;
 
     float exitTime = pros::c::millis() + timeOut; // this variable holds the time we exit if we take too long
     
@@ -121,8 +126,9 @@ void go_straight(double distance, int power, int momentum, int minPower, int dec
         pros::delay(20);
     }
 
-    double remainingDistance = distanceDegrees - abs(avg_encoder());
-    master.print(0,0, "final position: %f", remainingDistance);
+    //double remainingDistance = distanceDegrees - abs(avg_encoder());
+    //master.print(0,0, "%f", abs(avg_encoder()));
+    //master.print(0,0, "final position: %f", remainingDistance);
     
     move(0,0);
     pros::delay(100);

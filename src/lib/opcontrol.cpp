@@ -55,9 +55,8 @@ void opcontrol_init() {
 
 // driver control code
 void opcontrol_loop() {
-    
     // driving controls
-    //arcade_drive_regular();
-    arcade_drive_pid(100);
+    arcade_drive_regular();
+    //arcade_drive_pid(100);
     pros::delay(20);
 }

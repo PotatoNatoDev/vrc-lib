@@ -12,9 +12,7 @@ inline double rotationToHeading(double rotation) {
     double heading = fmodf(rotation, 360);
 
     // if its a negative value, add 360 to make it between (0-360)
-    if (heading < 0) {
-        heading += 360;
-    }
+    if (heading < 0) heading += 360;
 
     return heading;
 }

@@ -76,7 +76,7 @@ void turn(double targetHeading, int forceDirection, double safeZone, float safeT
     // stop motors
     move(0,0);
     turnPID.reset(); // reset PID (again to be safe)
-    pros::delay(100); // delay so any movement from the motors settle before moving on.
+    pros::delay(50); // delay so any movement from the motors settle before moving on.
 }
 
 PID goStraightPID(2,0,0); //tune this for going straight
@@ -101,8 +101,8 @@ void go_straight(double distance, int power, int momentum, int minPower, int dec
 
     // For some reason you might need to multiply these by 2.67 for it to work.
     // No clue why since in theory it should work without multiplying it by 2.67.
-    double distanceDegrees = (distance/wheelCircumference) * 360 * drivetrainRatio * 2.67;
-    double decelDegrees = (decelZone/wheelCircumference) * 360 * drivetrainRatio * 2.67;
+    double distanceDegrees = (distance/wheelCircumference) * 360 * drivetrainRatio;
+    double decelDegrees = (decelZone/wheelCircumference) * 360 * drivetrainRatio;
 
     float exitTime = pros::c::millis() + timeOut; // this variable holds the time we exit if we take too long
     
@@ -131,5 +131,5 @@ void go_straight(double distance, int power, int momentum, int minPower, int dec
     //master.print(0,0, "final position: %f", remainingDistance);
     
     move(0,0);
-    pros::delay(100);
+    pros::delay(50);
 }

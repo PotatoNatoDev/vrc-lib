@@ -2,6 +2,7 @@
 #include "globals.hpp"
 #include "lib/opcontrol.hpp"
 #include "lib/autoncontrol.hpp"
+#include "route/routes.hpp"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -50,7 +51,8 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-    turn(90);
+    //auton_noop();
+    auton_example();
 }
 
 /**

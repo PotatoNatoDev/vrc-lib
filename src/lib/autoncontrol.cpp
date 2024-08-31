@@ -107,6 +107,8 @@ void go_straight(double distance, int power, int momentum, int minPower, int dec
     float exitTime = pros::c::millis() + timeOut; // this variable holds the time we exit if we take too long
     
     double currentPower = power * 10;
+
+    goStraightPID.reset();
     
     while(abs(avg_encoder()) < distanceDegrees - momentum && pros::c::millis() < exitTime) {
         double remainingDistance = distanceDegrees - abs(avg_encoder());
@@ -131,5 +133,6 @@ void go_straight(double distance, int power, int momentum, int minPower, int dec
     //master.print(0,0, "final position: %f", remainingDistance);
     
     move(0,0);
+    goStraightPID.reset();
     pros::delay(50);
 }
